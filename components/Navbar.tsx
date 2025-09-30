@@ -15,12 +15,16 @@ import { cn } from "@/lib/utils";
 const data = [
   {
     title: "Home",
-    icon: <HomeIcon className="h-full w-full text-white dark:text-neutral-300" />,
+    icon: (
+      <HomeIcon className="h-full w-full text-white dark:text-neutral-300" />
+    ),
     href: "/",
   },
   {
     title: "Tutorials",
-    icon: <BookOpen className="h-full w-full text-white dark:text-neutral-300" />,
+    icon: (
+      <BookOpen className="h-full w-full text-white dark:text-neutral-300" />
+    ),
     href: "/tutorials",
   },
   {
@@ -30,7 +34,9 @@ const data = [
   },
   {
     title: "Purchase",
-    icon: <ShoppingCart className="h-full w-full text-white dark:text-neutral-300" />,
+    icon: (
+      <ShoppingCart className="h-full w-full text-white dark:text-neutral-300" />
+    ),
     href: "/shop",
   },
 ];
@@ -48,12 +54,10 @@ const Navbar = () => {
       flex items-center justify-between text-white"
     >
       <div className="flex items-center justify-between w-full gap-2 sm:gap-4">
-        
         <div className="cursor-pointer text-base sm:text-lg font-semibold whitespace-nowrap">
           3-in-1 BOT
         </div>
 
-        
         <div className="absolute left-1/2 transform -translate-x-1/2 bottom-1 sm:bottom-2">
           <Dock
             className="bg-transparent items-end pb-2 sm:pb-3"
@@ -81,10 +85,9 @@ const Navbar = () => {
 
         {/* Right Side: Button */}
         <div className="shrink-0 flex">
-          {status === "unauthenticated" && (
-            <Link href="/auth/login">
-              <Button
-                className="bg-[#0a0a1a]/60 
+          <Link href="/auth/login">
+            <Button
+              className="bg-[#0a0a1a]/60 
                 backdrop-blur-md 
                 border border-cyan-400/30 
                 text-white 
@@ -95,11 +98,10 @@ const Navbar = () => {
                 hover:text-cyan-200
                 text-sm sm:text-base
                 transition-all duration-300 cursor-pointer"
-              >
-                Login
-              </Button>
-            </Link>
-          )}
+            >
+              Login
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>

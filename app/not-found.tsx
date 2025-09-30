@@ -1,8 +1,9 @@
+// app/not-found.tsx
 export default function NotFound() {
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-screen items-center justify-center">
       <h1 className="text-3xl font-bold">404 - Page Not Found</h1>
-      <p className="mt-2 text-neutral-500">Sorry, the page you are looking for does not exist.</p>
+      <p className="text-gray-500">The page you are looking for does not exist.</p>
     </div>
   );
 }
