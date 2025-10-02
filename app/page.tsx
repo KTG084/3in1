@@ -1,15 +1,288 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import AnimatedContent from "@/components/AnimatedContent";
 import DecryptedText from "@/components/DecryptedText";
 import TrueFocus from "@/components/TrueFocus";
 import ShinyText from "@/components/ShinyText";
 
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { useEffect, useRef, useState } from "react";
+
 export default function Home() {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    let animationFrameId: number;
+    let controls: OrbitControls;
+    let renderer: THREE.WebGLRenderer;
+
+    const initScene = () => {
+      // Renderer with transparent background
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true, // Enable transparency
+      });
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setSize(
+        mountRef.current!.clientWidth,
+        mountRef.current!.clientHeight
+      );
+      renderer.setClearColor(0x000000, 0); // Fully transparent (alpha = 0)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = false;
+      mountRef.current!.appendChild(renderer.domElement);
+
+      // Scene - ensure no background is set
+      const scene = new THREE.Scene();
+      scene.background = null; // Explicitly set to null for transparency
+      sceneRef.current = scene;
+
+      // Camera
+      const camera = new THREE.PerspectiveCamera(
+        30,
+        mountRef.current!.clientWidth / mountRef.current!.clientHeight,
+        0.1,
+        500
+      );
+      camera.position.set(0, 1.5, 4);
+
+      // Controls
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = 1.5;
+      controls.maxDistance = 6;
+      controls.minPolarAngle = 0.3;
+      controls.maxPolarAngle = 1.4;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 1.2;
+      controls.target = new THREE.Vector3(0, 1.5, 0);
+      controls.update();
+
+      // Enhanced Lighting
+      const mainLight = new THREE.DirectionalLight(0x67e8f9, 4);
+      mainLight.position.set(2, 10, 4);
+      mainLight.castShadow = false;
+      scene.add(mainLight);
+
+      const ambientLight = new THREE.AmbientLight(0x404040, 2.5);
+      scene.add(ambientLight);
+
+      const fillLight = new THREE.HemisphereLight(0x67e8f9, 0x1a1a2e, 1);
+      scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight(0xffffff, 2);
+      rimLight.position.set(-4, 3, -4);
+      scene.add(rimLight);
+
+      // Fallback robot model
+      const createFallbackModel = () => {
+        const group = new THREE.Group();
+
+        // Body
+        const bodyGeometry = new THREE.BoxGeometry(2, 1.5, 1);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+          color: 0x67e8f9,
+          metalness: 0.4,
+          roughness: 0.3,
+          transparent: false,
+        });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.castShadow = false;
+        body.position.y = 1.5;
+        group.add(body);
+
+        // Head
+        const headGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+        const headMaterial = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          metalness: 0.3,
+          roughness: 0.2,
+          transparent: false,
+        });
+        const head = new THREE.Mesh(headGeometry, headMaterial);
+        head.castShadow = false;
+        head.position.y = 3.2;
+        group.add(head);
+
+        // Eyes with glow
+        const eyeGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+        const eyeMaterial = new THREE.MeshStandardMaterial({
+          color: 0x000000,
+          emissive: 0x67e8f9,
+          emissiveIntensity: 0.6,
+        });
+
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        leftEye.position.set(-0.3, 3.3, 0.7);
+        group.add(leftEye);
+
+        const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        rightEye.position.set(0.3, 3.3, 0.7);
+        group.add(rightEye);
+
+        // Arms
+        const armGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+        const armMaterial = new THREE.MeshStandardMaterial({
+          color: 0x67e8f9,
+          metalness: 0.4,
+          roughness: 0.3,
+          transparent: false,
+        });
+
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.castShadow = false;
+        leftArm.position.set(-1.5, 1.5, 0);
+        leftArm.rotation.z = Math.PI / 4;
+        group.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.castShadow = false;
+        rightArm.position.set(1.5, 1.5, 0);
+        rightArm.rotation.z = -Math.PI / 4;
+        group.add(rightArm);
+
+        // Wheels
+        const wheelGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 16);
+        const wheelMaterial = new THREE.MeshStandardMaterial({
+          color: 0x333333,
+          metalness: 0.6,
+          roughness: 0.2,
+          transparent: false,
+        });
+
+        const leftWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        leftWheel.rotation.z = Math.PI / 2;
+        leftWheel.position.set(-1.2, 0.5, 0);
+        group.add(leftWheel);
+
+        const rightWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        rightWheel.rotation.z = Math.PI / 2;
+        rightWheel.position.set(1.2, 0.5, 0);
+        group.add(rightWheel);
+
+        // Antenna
+        const antennaGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
+        const antennaMaterial = new THREE.MeshStandardMaterial({
+          color: 0x67e8f9,
+          metalness: 0.6,
+          roughness: 0.2,
+        });
+        const antenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+        antenna.position.set(0, 4.2, 0);
+        group.add(antenna);
+
+        const antennaBall = new THREE.Mesh(
+          new THREE.SphereGeometry(0.15, 8, 8),
+          new THREE.MeshStandardMaterial({
+            color: 0x67e8f9,
+            emissive: 0x67e8f9,
+            emissiveIntensity: 0.6,
+          })
+        );
+        antennaBall.position.set(0, 4.6, 0);
+        group.add(antennaBall);
+
+        group.position.set(0, 1.05, 0);
+        group.scale.set(2.2, 2.2, 2.2);
+        scene.add(group);
+        return group;
+      };
+
+      // GLTF Loader
+      const loader = new GLTFLoader();
+
+      loader.load(
+        "/scene.gltf",
+        (gltf) => {
+          const mesh = gltf.scene;
+          mesh.traverse((child: any) => {
+            if (child.isMesh) {
+              child.castShadow = false;
+              child.receiveShadow = false;
+
+              // Ensure materials are not transparent
+              if (child.material) {
+                child.material.metalness = 0.3;
+                child.material.roughness = 0.4;
+                child.material.transparent = false;
+                child.material.needsUpdate = true;
+              }
+            }
+          });
+          mesh.position.set(0, 2.0, 0.5);
+          mesh.scale.set(7.5, 7.5, 7.5);
+          scene.add(mesh);
+          setLoadingProgress(100);
+        },
+        (xhr) => {
+          const percent = Math.round((xhr.loaded / xhr.total) * 100);
+          setLoadingProgress(percent);
+        },
+        (error) => {
+          console.error("Failed to load 3D model, using fallback:", error);
+          setLoadingError("Using fallback model");
+          createFallbackModel();
+          setLoadingProgress(100);
+        }
+      );
+
+      // Resize handler
+      const handleResize = () => {
+        if (!mountRef.current) return;
+        camera.aspect =
+          mountRef.current.clientWidth / mountRef.current.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(
+          mountRef.current.clientWidth,
+          mountRef.current.clientHeight
+        );
+      };
+      window.addEventListener("resize", handleResize);
+
+      // Animation loop
+      const animate = () => {
+        animationFrameId = requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      return { handleResize, controls, renderer };
+    };
+
+    const { handleResize } = initScene();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      controls?.dispose();
+      renderer?.dispose();
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      if (mountRef.current && renderer?.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  const isLoading = loadingProgress < 100;
+
   return (
     <div className="relative min-h-screen overflow-hidden text-white">
-      {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col min-h-screen px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-20">
-        {/* Header Section - Improved mobile responsiveness */}
-        <div className="w-full max-w-7xl mx-auto text-center mb-12 sm:mb-16 lg:mb-20">
+      {/* Hero Section */}
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <AnimatedContent
             distance={40}
             direction="vertical"
@@ -22,145 +295,211 @@ export default function Home() {
             threshold={0.1}
             delay={0.1}
           >
-            <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-              <div className="mb-2 sm:mb-4">
-                <TrueFocus
-                  sentence="3-IN-1 BOT"
-                  manualMode={false}
-                  glowColor="#67e8f9"
-                  blurAmount={8}
-                  borderColor="#67e8f9"
-                  animationDuration={0.6}
-                  pauseBetweenAnimations={1.2}
-                  className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl"
-                />
-              </div>
-              <div className="px-2 sm:px-4 max-w-2xl sm:max-w-3xl mx-auto">
+            <div className="space-y-4 sm:space-y-6">
+              <TrueFocus
+                sentence="3-IN-1 BOT"
+                manualMode={false}
+                glowColor="#67e8f9"
+                blurAmount={8}
+                borderColor="#67e8f9"
+                animationDuration={0.6}
+                pauseBetweenAnimations={1.2}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold"
+              />
+              <div className="max-w-3xl mx-auto px-4">
                 <ShinyText
                   text="Build Your Own 3-in-1 Toy. Personalized Learning with STEM Starts Here."
                   disabled={false}
                   speed={4}
-                  className="text-cyan-200/90 drop-shadow-[0_0_15px_#67e8f9] text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-medium leading-relaxed"
+                  className="text-cyan-200/90 drop-shadow-[0_0_15px_#67e8f9] text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed"
                 />
               </div>
             </div>
           </AnimatedContent>
         </div>
 
-      
-        <div className="w-full max-w-7xl mx-auto flex-grow">
-          <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8 sm:gap-10 lg:gap-12 xl:gap-16">
-            {/* Left Side - Decrypted Text */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-start order-2 lg:order-1">
-              <AnimatedContent
-                distance={40}
-                direction="horizontal"
-                reverse={true}
-                duration={0.5}
-                ease="easeOutCubic"
-                initialOpacity={0}
-                animateOpacity
-                scale={1.03}
-                threshold={0.1}
-                delay={0.2}
-              >
-                <div className="space-y-6 sm:space-y-8 max-w-lg lg:max-w-none text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-snug sm:leading-tight">
-                    <DecryptedText
-                      text="We Have The Best 3-in-1 Toy"
-                      speed={80}
-                      maxIterations={25}
-                      characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?"
-                      className="revealed leading-tight bg-gradient-to-r from-white to-cyan-100 bg-clip-text text-transparent"
-                      revealDirection="start"
-                      parentClassName="all-letters"
-                      animateOn="view"
-                      encryptedClassName="encrypted text-cyan-400/40"
-                    />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
+          {/* Left Column - Text Content */}
+          <div className="order-2 lg:order-1">
+            <AnimatedContent
+              distance={40}
+              direction="horizontal"
+              reverse={true}
+              duration={0.5}
+              ease="easeOutCubic"
+              initialOpacity={0}
+              animateOpacity
+              scale={1.03}
+              threshold={0.1}
+              delay={0.2}
+            >
+              <div className="space-y-6 sm:space-y-8">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  <DecryptedText
+                    text="We Have The Best 3-in-1 Toy"
+                    speed={80}
+                    maxIterations={25}
+                    characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?"
+                    className="revealed bg-gradient-to-r from-white via-cyan-100 to-cyan-200 bg-clip-text text-transparent"
+                    revealDirection="start"
+                    parentClassName="all-letters"
+                    animateOn="view"
+                    encryptedClassName="encrypted text-cyan-400/40"
+                  />
+                </h2>
+
+                <div className="space-y-6">
+                  <DecryptedText
+                    text="Transform playtime into learning time with our revolutionary 3-in-1 BOT that adapts to air, water, and land environments. Designed for curious minds and future innovators."
+                    speed={80}
+                    maxIterations={25}
+                    characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?"
+                    className="revealed text-slate-300 text-lg sm:text-xl leading-relaxed font-light"
+                    revealDirection="start"
+                    parentClassName="all-letters"
+                    animateOn="view"
+                    encryptedClassName="encrypted text-cyan-400/40"
+                  />
+
+                  {/* Feature Tags */}
+                  <div className="flex flex-wrap gap-3 pt-4">
+                    <span className="px-4 py-2.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-cyan-300 text-sm font-medium backdrop-blur-sm hover:bg-cyan-500/30 hover:scale-105 transition-all duration-300 cursor-pointer">
+                      🚀 STEM Learning
+                    </span>
+                    <span className="px-4 py-2.5 bg-blue-500/20 border border-blue-500/40 rounded-full text-blue-300 text-sm font-medium backdrop-blur-sm hover:bg-blue-500/30 hover:scale-105 transition-all duration-300 cursor-pointer">
+                      🌊 3 Environments
+                    </span>
+                    <span className="px-4 py-2.5 bg-purple-500/20 border border-purple-500/40 rounded-full text-purple-300 text-sm font-medium backdrop-blur-sm hover:bg-purple-500/30 hover:scale-105 transition-all duration-300 cursor-pointer">
+                      🎯 Educational
+                    </span>
                   </div>
 
-                  <div className="space-y-4 sm:space-y-6 text-slate-300">
-                    <DecryptedText
-                      text="Transform playtime into learning time with our
-                      revolutionary 3-in-1 BOT that adapts to air, water, and
-                      land environments. Designed for curious minds and future
-                      innovators."
-                      speed={80}
-                      maxIterations={25}
-                      characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!?"
-                      className="revealed text-base sm:text-lg md:text-xl leading-relaxed sm:leading-loose font-light"
-                      revealDirection="start"
-                      parentClassName="all-letters"
-                      animateOn="view"
-                      encryptedClassName="encrypted text-cyan-400/40"
-                    />
-                    <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 pt-2 sm:pt-4">
-                      <span className="px-3 sm:px-4 py-2 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-cyan-300 text-xs sm:text-sm font-medium backdrop-blur-sm hover:bg-cyan-500/30 transition-all duration-300">
-                        🚀 STEM Learning
-                      </span>
-                      <span className="px-3 sm:px-4 py-2 bg-blue-500/20 border border-blue-500/40 rounded-full text-blue-300 text-xs sm:text-sm font-medium backdrop-blur-sm hover:bg-blue-500/30 transition-all duration-300">
-                        🌊 3 Environments
-                      </span>
-                      <span className="px-3 sm:px-4 py-2 bg-purple-500/20 border border-purple-500/40 rounded-full text-purple-300 text-xs sm:text-sm font-medium backdrop-blur-sm hover:bg-purple-500/30 transition-all duration-300">
-                        🎯 Educational
-                      </span>
+                  {/* CTA Button */}
+                  <div className="pt-4">
+                    <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-full text-white font-semibold text-lg shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70 transition-all duration-300 hover:scale-105">
+                      Explore Features
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </AnimatedContent>
+          </div>
+
+          {/* Right Column - 3D Model */}
+          <div className="order-1 lg:order-2">
+            <AnimatedContent
+              distance={40}
+              direction="horizontal"
+              reverse={false}
+              duration={0.5}
+              ease="easeOutCubic"
+              initialOpacity={0}
+              animateOpacity
+              scale={1.03}
+              threshold={0.1}
+              delay={0.3}
+            >
+              <div className="relative">
+                {/* 3D Canvas Container - Now with transparent inner background */}
+                <div className="relative w-full aspect-square max-w-2xl mx-auto">
+                  {/* Animated Gradient Border */}
+                  <div className="absolute inset-0 rounded-3xl">
+                    {/* Changed background from bg-transparent to explicitly transparent */}
+                    <div
+                      className="relative w-full h-full rounded-2xl overflow-hidden"
+                      style={{ backgroundColor: "transparent" }}
+                    >
+                      <div
+                        ref={mountRef}
+                        className="absolute inset-0 w-full h-full"
+                        style={{ backgroundColor: "transparent" }}
+                      />
+
+                      {/* Progress Loader */}
+                      {isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center z-20 rounded-2xl">
+                          <div className="text-center space-y-4">
+                            <div className="relative">
+                              <div className="w-16 h-16 border-4 border-cyan-500/30 rounded-full mx-auto"></div>
+                              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 border-4 border-transparent border-t-cyan-500 rounded-full animate-spin"></div>
+                            </div>
+                            <div className="text-lg text-cyan-400 font-medium space-y-2">
+                              <div>Loading 3-in-1 BOT...</div>
+                              <div className="text-sm">{loadingProgress}%</div>
+                              {loadingError && (
+                                <div className="text-yellow-400 text-sm">
+                                  {loadingError}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Interaction Hint */}
+                      {!isLoading && (
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-cyan-300/80 text-sm font-medium backdrop-blur-sm bg-slate-900/70 px-6 py-3 rounded-full border border-cyan-500/40 shadow-lg">
+                          🖱️ Drag to Rotate • Scroll to Zoom
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </AnimatedContent>
-            </div>
+              </div>
+            </AnimatedContent>
           </div>
+        </div>
+
+        {/* Features Section */}
+        <div className="mt-16 sm:mt-24 lg:mt-32">
+          <AnimatedContent
+            distance={40}
+            direction="vertical"
+            reverse={false}
+            duration={0.5}
+            ease="easeOutCubic"
+            initialOpacity={0}
+            animateOpacity
+            scale={1.03}
+            threshold={0.1}
+            delay={0.4}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {[
+                {
+                  icon: "✈️",
+                  title: "Air Mode",
+                  desc: "Soar through the skies with aerodynamic design",
+                },
+                {
+                  icon: "🌊",
+                  title: "Water Mode",
+                  desc: "Dive into aquatic adventures seamlessly",
+                },
+                {
+                  icon: "🚗",
+                  title: "Land Mode",
+                  desc: "Navigate any terrain with precision control",
+                },
+              ].map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="p-6 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                >
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-bold text-cyan-300 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-slate-400">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+          </AnimatedContent>
         </div>
       </div>
 
-      {/* Enhanced Ambient Background Effects - Mobile optimized */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] bg-gradient-to-r from-blue-500/15 to-cyan-500/10 rounded-full blur-2xl lg:blur-3xl animate-float"></div>
-        <div
-          className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] lg:w-[450px] lg:h-[450px] bg-cyan-500/10 rounded-full blur-2xl lg:blur-3xl animate-pulse-slow"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div
-          className="absolute top-1/3 right-1/4 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] lg:w-[350px] lg:h-[350px] bg-purple-500/8 rounded-full blur-2xl lg:blur-3xl animate-float"
-          style={{ animationDelay: "4s" }}
-        ></div>
-        <div
-          className="absolute bottom-1/3 left-1/4 w-[220px] h-[220px] sm:w-[320px] sm:h-[320px] lg:w-[400px] lg:h-[400px] bg-indigo-500/5 rounded-full blur-2xl lg:blur-3xl animate-pulse-slow"
-          style={{ animationDelay: "1s" }}
-        ></div>
-      </div>
-
-      {/* Enhanced Grid Overlay - Mobile optimized */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.1] sm:opacity-[0.15]">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(103, 232, 249, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(103, 232, 249, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: "40px 40px",
-            maskImage:
-              "radial-gradient(circle at center, black 20%, transparent 60%)",
-          }}
-        ></div>
-      </div>
-
-      {/* Floating Particles - Reduced count for mobile */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-[1px] h-[1px] sm:w-[2px] sm:h-[2px] bg-cyan-400/30 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 20}s`,
-              animationDuration: `${15 + Math.random() * 20}s`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Add custom animation for gradient */}
     </div>
   );
 }

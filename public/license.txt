@@ -1,0 +1,11 @@
+Model Information:
+* title:	BoatDrone
+* source:	https://sketchfab.com/3d-models/boatdrone-aa92da154f434c2c9d9c6d654fd77e8e
+* author:	karanjyotimedhi5678 (https://sketchfab.com/karanjyotimedhi5678)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "BoatDrone" (https://sketchfab.com/3d-models/boatdrone-aa92da154f434c2c9d9c6d654fd77e8e) by karanjyotimedhi5678 (https://sketchfab.com/karanjyotimedhi5678) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
