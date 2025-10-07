@@ -13,17 +13,14 @@ import { useEffect, useRef, useState } from "react";
 import Flowchart from "@/components/Flowchart";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
+
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@radix-ui/react-label";
+
 
 export default function Home() {
   const mountRef = useRef<HTMLDivElement | null>(null);
