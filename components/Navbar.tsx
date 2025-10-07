@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { BookOpen, ShoppingCart, HomeIcon, Video } from "lucide-react";
+import { BookOpen, ShoppingCart, HomeIcon} from "lucide-react";
 import {
   Dock,
   DockIcon,
@@ -26,11 +26,6 @@ const data = [
       <BookOpen className="h-full w-full text-white dark:text-neutral-300" />
     ),
     href: "/tutorials",
-  },
-  {
-    title: "Meetings",
-    icon: <Video className="h-full w-full text-white dark:text-neutral-300" />,
-    href: "/meetings",
   },
   {
     title: "Purchase",

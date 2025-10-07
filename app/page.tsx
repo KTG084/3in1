@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { useEffect, useRef, useState } from "react";
+import Flowchart from "@/components/Flowchart";
 
 export default function Home() {
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -300,7 +301,6 @@ export default function Home() {
                 sentence="3-IN-1 BOT"
                 manualMode={false}
                 glowColor="#67e8f9"
-                blurAmount={8}
                 borderColor="#67e8f9"
                 animationDuration={0.6}
                 pauseBetweenAnimations={1.2}
@@ -497,9 +497,22 @@ export default function Home() {
             </div>
           </AnimatedContent>
         </div>
-      </div>
 
-      {/* Add custom animation for gradient */}
+        <AnimatedContent
+          distance={40}
+          direction="vertical"
+          reverse={false}
+          duration={0.5}
+          ease="easeOutCubic"
+          initialOpacity={0}
+          animateOpacity
+          scale={1.03}
+          threshold={0.1}
+          delay={0.3}
+        >
+          <Flowchart />
+        </AnimatedContent>
+      </div>
     </div>
   );
 }

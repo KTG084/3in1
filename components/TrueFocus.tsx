@@ -7,12 +7,11 @@ import "./TrueFocus.css";
 interface TrueFocusProps {
   sentence?: string;
   manualMode?: boolean;
-  blurAmount?: number;
   borderColor?: string;
   glowColor?: string;
   animationDuration?: number;
   pauseBetweenAnimations?: number;
-  className: string;
+  className?: string;
 }
 
 interface FocusRect {
@@ -25,11 +24,10 @@ interface FocusRect {
 const TrueFocus: React.FC<TrueFocusProps> = ({
   sentence = "True Focus",
   manualMode = false,
-  blurAmount = 5,
-  borderColor = "green",
-  glowColor = "rgba(0, 255, 0, 0.6)",
-  animationDuration = 0.5,
-  pauseBetweenAnimations = 1,
+  borderColor = "cyan",
+  glowColor = "rgba(0, 255, 255, 0.6)",
+  animationDuration = 0.6,
+  pauseBetweenAnimations = 1.2,
 }) => {
   const words = sentence.split(" ");
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -50,16 +48,12 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % words.length);
       }, (animationDuration + pauseBetweenAnimations) * 1000);
-
       return () => clearInterval(interval);
     }
   }, [manualMode, animationDuration, pauseBetweenAnimations, words.length]);
 
   useEffect(() => {
-    if (currentIndex === null || currentIndex === -1) return;
-
     if (!wordRefs.current[currentIndex] || !containerRef.current) return;
-
     const parentRect = containerRef.current.getBoundingClientRect();
     const activeRect = wordRefs.current[currentIndex]!.getBoundingClientRect();
 
@@ -91,24 +85,13 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         return (
           <span
             key={index}
-            ref={(el) => {
-              if (el) {
-                wordRefs.current[index] = el;
-              }
-            }}
+            ref={(el) => { wordRefs.current[index] = el; }}
             className={`focus-word ${manualMode ? "manual" : ""} ${
-              isActive && !manualMode ? "active" : ""
+              isActive ? "active" : ""
             }`}
             style={
               {
-                filter: manualMode
-                  ? isActive
-                    ? `blur(0px)`
-                    : `blur(${blurAmount}px)`
-                  : isActive
-                  ? `blur(0px)`
-                  : `blur(${blurAmount}px)`,
-                transition: `filter ${animationDuration}s ease`,
+                transition: `color ${animationDuration}s ease`,
                 "--border-color": borderColor,
                 "--glow-color": glowColor,
               } as React.CSSProperties
@@ -121,6 +104,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         );
       })}
 
+      {/* Animated focus frame */}
       <motion.div
         className="focus-frame"
         animate={{
@@ -132,6 +116,7 @@ const TrueFocus: React.FC<TrueFocusProps> = ({
         }}
         transition={{
           duration: animationDuration,
+          ease: "easeInOut",
         }}
         style={
           {
