@@ -11,6 +11,19 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { useEffect, useRef, useState } from "react";
 import Flowchart from "@/components/Flowchart";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@radix-ui/react-label";
 
 export default function Home() {
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -377,9 +390,148 @@ export default function Home() {
 
                   {/* CTA Button */}
                   <div className="pt-4">
-                    <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-full text-white font-semibold text-lg shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70 transition-all duration-300 hover:scale-105">
-                      Explore Features
-                    </button>
+                    <Dialog>
+  <DialogTrigger asChild>
+    <button className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-full text-white font-semibold text-lg shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70 transition-all duration-300 hover:scale-105">
+      Explore Features
+    </button>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-black border-2 border-cyan-500/30 text-white">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+        3-IN-1 TRANSFORMABLE DRONE
+      </DialogTitle>
+      <DialogDescription className="text-gray-300 text-center">
+        Seamlessly transitions between three exciting modes for unique play and learning experiences
+      </DialogDescription>
+    </DialogHeader>
+    
+    <div className="space-y-6 py-4">
+      {/* Modes Section */}
+      <div className="bg-gray-800/50 rounded-xl p-6 border border-cyan-500/20">
+        <h3 className="text-xl font-bold mb-4 text-cyan-400 flex items-center gap-2">
+          <span className="text-2xl">🚀</span> Modes & Functionality
+        </h3>
+        
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Drone Mode */}
+          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4 rounded-lg border border-blue-500/30">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <h4 className="font-bold text-blue-400">Drone Mode</h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Fully functional mini drone with four high-speed coreless motors for stable flight. 
+              Perform stunts like 360° flips and aerobatic rolls.
+            </p>
+          </div>
+
+          {/* Boat Mode */}
+          <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 p-4 rounded-lg border border-green-500/30">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <h4 className="font-bold text-green-400">Boat Mode</h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Rotate motor shafts to transform into a boat, using propellers to glide over water effortlessly.
+            </p>
+          </div>
+
+          {/* Car Mode */}
+          <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 p-4 rounded-lg border border-orange-500/30">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+              <h4 className="font-bold text-orange-400">Car Mode</h4>
+            </div>
+            <p className="text-sm text-gray-300">
+              Motors drive airflow to propel forward on land, creating a fast and fun ground vehicle.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-gray-800/50 rounded-xl p-6 border border-purple-500/20">
+        <h3 className="text-xl font-bold mb-4 text-purple-400 flex items-center gap-2">
+          <span className="text-2xl">⭐</span> Advanced Features
+        </h3>
+        
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Column 1 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+              <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">🛡️</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-purple-300">Obstacle Avoidance</h4>
+                <p className="text-sm text-gray-300">Built-in VL5310X sensor prevents head-on collisions</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+              <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">🎁</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-green-300">Extra Accessories</h4>
+                <p className="text-sm text-gray-300">Additional propellers and guards included</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">👶</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-blue-300">Child Safe Design</h4>
+                <p className="text-sm text-gray-300">Propeller guards and lightweight PLA material</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">🎯</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-red-300">Stunt Capabilities</h4>
+                <p className="text-sm text-gray-300">360° flips, barrel rolls, and quick turns</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+              <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">🔒</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-yellow-300">Manual Locking</h4>
+                <p className="text-sm text-gray-300">Stable motor shafts during mode switching</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs">🌱</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-emerald-300">Eco-Friendly & Educational</h4>
+                <p className="text-sm text-gray-300">Biodegradable PLA teaches sustainable engineering</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Highlights Section */}
+      
+    </div>
+
+    
+  </DialogContent>
+</Dialog>
                   </div>
                 </div>
               </div>
@@ -469,18 +621,18 @@ export default function Home() {
               {[
                 {
                   icon: "✈️",
-                  title: "Air Mode",
-                  desc: "Soar through the skies with aerodynamic design",
+                  title: "Drone Mode",
+                  desc: "Take flight with a high-speed mini drone built for stability, 360° flips, and smooth aerial rolls that make every flight feel effortless.",
                 },
                 {
                   icon: "🌊",
-                  title: "Water Mode",
-                  desc: "Dive into aquatic adventures seamlessly",
+                  title: "Boat Mode",
+                  desc: "Transform your drone into a sleek water glider — rotate the motor shafts and watch it cruise smoothly across any surface with propeller-powered agility.",
                 },
                 {
                   icon: "🚗",
-                  title: "Land Mode",
-                  desc: "Navigate any terrain with precision control",
+                  title: "Car Mode",
+                  desc: "Hit the ground running as the drone converts into a fast, fun land racer, using motor-driven airflow for powerful and precise motion.",
                 },
               ].map((feature, idx) => (
                 <div
